@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eux
+
+sudo apt update
+
+# Fix build path permissions for Nix
+sudo apt install acl
+sudo setfacl -k /tmp
+
+# Install Nix
+sh <(curl -L https://nixos.org/nix/install) --no-daemon
+sudo mkdir -p /etc/nix
+echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
+source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+
+# Install configs
+git clone https://github.com/joshua-cooper/nix-config /workspaces/nix-config
+nix run nixpkgs#home-manager -- switch --flake /workspaces/nix-config
